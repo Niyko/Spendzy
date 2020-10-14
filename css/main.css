@@ -1,0 +1,232 @@
+:root {
+    --primary-color: #fec007;
+}  
+
+@font-face {
+    font-family: 'ps-regular';
+    src: url('fonts/product_sans_regular.ttf');
+}
+
+@font-face {
+    font-family: 'ps-bold';
+    src: url('fonts/product_sans_bold.ttf');
+}
+
+*{
+    -webkit-tap-highlight-color: transparent;
+}
+
+body{
+    background: #ffffff;
+    margin: 0 0 0 0;
+    overflow-y: scroll;
+}
+
+button, button:active, input:focus, input:invalid{
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
+.hide{
+    display: none;
+}
+
+.nav-bar{
+    box-shadow: inset 0 -1px 0 0 #dadce0;
+    height: 61px;
+    padding: 0px 5px;
+}
+
+.nav-bar-icon-btn{
+    color: #5f6368;
+    height: 50px;
+    width: 50px;
+    border-radius: 10000px;
+    line-height: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+}
+
+.nav-bar-icon-btn:active{
+    padding: 0px;
+}
+
+.nav-bar .spinner-container{
+    width: 35px;
+    height: 35px;
+}
+
+.nav-bar .spinner{
+    font-size: 22px;
+}
+
+.nav-bar .spinner circle{
+    stroke: #5f6368;
+}
+
+.nav-bar-title{
+    font-family: 'ps-regular';
+    font-size: 19px;
+    margin: 0;
+    padding: 0px;
+    line-height: 0px;
+    color: #5f6368;
+}
+
+.nav-bar-stat-text{
+    font-family: 'ps-regular';
+    text-transform: uppercase;
+    font-size: 15px;
+    margin: 0;
+    padding: 0px;
+    line-height: 0px;
+    letter-spacing: 0.026em;
+    color: #5f6368;
+}
+
+.nav-bar-stat-text span{
+    opacity: 0.7;
+}
+
+.half-page{
+    max-width: 550px;
+    padding: 0px 10px 0px 10px;
+    padding-bottom: 20px;
+}
+
+.checklist-create-card{
+    background: #ffffff;
+    padding: 7px 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 35px;
+    border: 2.5px solid #d6d6d65c;
+}
+
+.checklist-create-card input{
+    width: inherit;
+    border: none;
+    font-family: 'ps-regular';
+    font-size: 16px;
+}
+
+.checklist-create-card-btn{
+    border-radius: 10000px;
+    width: 35px;
+    height: 35px;
+    line-height: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #b2b2b2;
+    position: relative;
+    left: 10px;
+}
+
+.checklist-checkbox{
+    width: 25px;
+    height: 25px;
+    border: 3px solid #b2b2b2;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.checklist-checkbox.active{
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    background-image: url('../images/checkbox-active-background.svg');
+    background-size: cover; 
+}
+
+.checklist-title{
+    font-size: 17px;
+    border: none;
+    width: inherit;
+    color: #000;
+    font-family: 'ps-regular';
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.checklist-amount{
+    font-size: 17px;
+    border: none;
+    width: 60px;
+    text-align: right;
+    color: #000;
+    font-family: 'ps-regular';
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.checklist-amount-currency{
+    font-family: 'ps-regular';
+    font-size: 16px;
+    margin-left: 3px;
+    opacity: 0.8;
+}
+
+.checklist-amount:focus{
+    outline: none;
+}
+
+.checklist-delete{
+    border-radius: 10000px;
+    width: 40px;
+    height: 40px;
+    line-height: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #b2b2b2;
+}
+
+.checklist-delete:active{
+    padding: 0px;
+}
+
+.checklist-item-deleted{
+    overflow: hidden;
+    animation: 1s deletedChecklistAnim forwards;
+}
+
+@keyframes deletedChecklistAnim {
+    from {
+        opacity: 1;
+        height: 40px;
+    }
+
+    80% {
+        opacity: 0;
+        height: 40px;
+    }
+
+    to {
+        opacity: 0;
+        height: 0px;
+    }
+}
+
+.list-container{
+    padding-left: 8px;
+}
+
+.list-title{
+    text-transform: uppercase;
+    font-family: 'ps-bold';
+    font-size: 13px;
+    letter-spacing: -0.025em;
+    margin-bottom: 11px;
+    opacity: 0.5;
+}
+
+#not-given-list{
+    margin-bottom: 35px;
+}
