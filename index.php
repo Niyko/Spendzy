@@ -1,10 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Spendable</title>
+        <title>Spendzy</title>
         <?php require('widgets/header.php'); ?>
     </head>
     <body>
+        <div class="error-container">
+            <div uk-grid class="error-inner">
+                <div class="uk-width-expand uk-flex uk-flex-middle">
+                    <p>Something went wrong, please try again.</p>
+                </div>
+                <div class="uk-width-auto uk-flex uk-flex-middle">
+                    <button class="error-close ripple-effect" onclick="location.reload();" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">close</span></button>
+                </div>
+            </div>
+        </div>
         <div uk-grid class="nav-bar uk-grid-small">
             <div class="uk-width-auto uk-flex uk-flex-middle">
                 <button class="nav-bar-icon-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">menu</span></button>
@@ -49,6 +59,10 @@
                     <div id="not-given-list"><!--- List render from JS ---></div>
                     <p class="list-title">Already given</p>
                     <div id="given-list"><!--- List render from JS ---></div>
+                    <div class="divider"></div>
+                    <div class="uk-flex uk-flex-right">
+                        <span class="imagine-checkbox" onclick="toggleImagineMode()"><span class="material-icons">toys</span></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -65,13 +79,9 @@
         <template hidden id="list-item-template">
             {{#each incomes}}
                 <div class="checklist-item">
-                    <div uk-grid>
+                    <div uk-grid class="uk-grid-small">
                         <div class="uk-width-auto uk-flex uk-flex-middle">
-                            {{#if this.is_given}}
-                                <button onclick="chechGiven(!{{this.is_given}}, this, '{{this.table_id}}')" class="checklist-checkbox active"></button>
-                            {{else}}
-                                <button onclick="chechGiven(!{{this.is_given}}, this, '{{this.table_id}}')" class="checklist-checkbox"></button>
-                            {{/if}}
+                            <button onclick="chechGiven(!{{this.is_given}}, this, '{{this.table_id}}')" class="checklist-checkbox {{#if this.is_given}}active{{/if}}"></button>
                         </div>
                         <div class="uk-width-expand uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('title', this, '{{this.table_id}}')" class="checklist-title" value="{{this.title}}">
@@ -95,6 +105,7 @@
         <script>
             var checkAudio = new Audio("sounds/check.mp3");
             var uncheckAudio = new Audio("sounds/uncheck.mp3");
+            var isImagineMode = false;
             var progressRequestCode = "";
             var listItemTemplate = Handlebars.compile($("#list-item-template").html());
             var statTemplate = Handlebars.compile($("#stat-template").html());
@@ -114,18 +125,21 @@
             }
 
             function loadIncome(){
-                database.collection("income").get().then((tableRows) => {
-                    rows = tableRows.docs.map(doc => Object.assign(
-                        { table_id: doc.id },
-                        doc.data()
-                    ));
-                    isGivenRows = rows.filter(doc => doc.is_given==true);
-                    notGivenRows = rows.filter(doc => doc.is_given==false);
-                    $("#given-list").html(listItemTemplate({ incomes: isGivenRows }));
-                    $("#not-given-list").html(listItemTemplate({ incomes: notGivenRows }));
-                    $(".half-page").fadeIn();
-                    toggleNavProgress(false);
-                });
+                database.collection("income").get()
+                    .then((tableRows) => {
+                        rows = tableRows.docs.map(doc => Object.assign(
+                            { table_id: doc.id },
+                            doc.data()
+                        ));
+                        isGivenRows = rows.filter(doc => doc.is_given==true);
+                        notGivenRows = rows.filter(doc => doc.is_given==false);
+                        $("#given-list").html(listItemTemplate({ incomes: isGivenRows }));
+                        $("#not-given-list").html(listItemTemplate({ incomes: notGivenRows }));
+                        $(".half-page").fadeIn();
+                        toggleNavProgress(false);
+                    }).catch(function(error) {
+                        onIncomeTableError();
+                    });
             }
 
             function addIncome(){
@@ -137,41 +151,42 @@
                     date: "Turing",
                 };
                 database.collection("income").add(newIncome)
-                    .then(function(docRef) {
+                    .then(function(row) {
+                        newIncome["table_id"] = row.id
+                        $("#create-form").trigger("reset");
+                        $("#not-given-list").prepend(listItemTemplate({ incomes: [newIncome] }));             
+                        $("#not-given-list .checklist-item:first-child").addClass("animate__animated animate__fadeInDown");
                         toggleNavProgress(false);
-                        console.log("Document written with ID: ", docRef.id);
                     })
                     .catch(function(error) {
-                        console.error("Error adding document: ", error);
+                        onIncomeTableError();
                     });
-                $("#create-form").trigger("reset");
-                $("#not-given-list").prepend(listItemTemplate({ incomes: [newIncome] }));             
-                $("#not-given-list .checklist-item:first-child").addClass("animate__animated animate__fadeInDown");
             }
 
             function chechGiven(isGiven, e, id){
                 if(isGiven) checkAudio.play(0);
                 else uncheckAudio.play(0);
-                toggleNavProgress(true, true, id);
-                database.collection("income").doc(id).update({is_given: isGiven}).then(function() {
-                        console.log("Document successfully updated!");
-                        toggleNavProgress(false, true, id);
-                    }).catch(function(error) {
-                        
-                    });
+                if(!isImagineMode){
+                    toggleNavProgress(true, true, id);
+                    database.collection("income").doc(id).update({is_given: isGiven}).then(function() {
+                            toggleNavProgress(false, true, id);
+                        }).catch(function(error) {
+                            onIncomeTableError();
+                        });
+                }
                 $(e).toggleClass("active");
                 $(e).closest(".checklist-item").prependTo((isGiven?"#given-list":"#not-given-list"));
                 $(e).closest(".checklist-item").addClass("animate__animated animate__fadeInDown");
                 $(e).attr("onclick", `chechGiven(!${isGiven}, this, '${id}')`);
+                if(isImagineMode) updateStat();
             }
 
             function onOtherDataChange(dataKey, e, id){
                 toggleNavProgress(true, true, id);
                 database.collection("income").doc(id).update({[dataKey]: $(e).val()}).then(function() {
-                        console.log("Document successfully updated!");
                         toggleNavProgress(false, true, id);
                     }).catch(function(error) {
-                        
+                        onIncomeTableError();
                     });
                 $(e).blur(); 
             }
@@ -179,27 +194,48 @@
             function deleteIncome(e, id){
                 toggleNavProgress(true, true, id);
                 database.collection("income").doc(id).delete().then(function() {
-                        console.log("Document successfully deleted!");
                         toggleNavProgress(false, true, id);
                     }).catch(function(error) {
-                        
+                        onIncomeTableError();
                     });
                 $(e).closest(".checklist-item").addClass("checklist-item-deleted");
             }
 
             function updateStat(){
                 var totalIncome = 0, totalGiven = 0;
-                database.collection("income").get().then((tableRows) => {
-                    tableRows.forEach((row) => {
-                        totalIncome += parseInt(row.data().amount);
-                        if(row.data().is_given) totalGiven += parseInt(row.data().amount);
+                database.collection("income").get()
+                    .then((tableRows) => {
+                        tableRows.forEach((row) => {
+                            totalIncome += parseInt(row.data().amount);
+                            if(row.data().is_given) totalGiven += parseInt(row.data().amount);
+                        });
+                        if(isImagineMode){
+                            totalGiven = 0;
+                            $("#given-list .checklist-amount").each(function(index) {
+                                totalGiven += parseInt($(this).val());
+                            });
+                        }
+                        $("#current-stat").html(statTemplate({ 
+                            total_given: nFormatter(totalGiven, 1),
+                            total_income: nFormatter(totalIncome, 1),
+                        }));
+                    }).catch(function(error) {
+                        onIncomeTableError();
                     });
-                    $("#current-stat").html(statTemplate({ 
-                        total_given: nFormatter(totalGiven, 1),
-                        total_income: nFormatter(totalIncome, 1),
-                    }));
-                    console.log(totalIncome);
-                });
+            }
+
+            function onIncomeTableError(){
+                loadIncome();
+                onDatabaseError();
+            }
+
+            function toggleImagineMode(){
+                $(".imagine-checkbox").toggleClass("active");
+                if(isImagineMode){
+                    loadIncome();
+                    updateStat();
+                }
+                isImagineMode = !isImagineMode;
             }
         </script>
     </body>
