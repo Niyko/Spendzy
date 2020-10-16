@@ -4,11 +4,9 @@ function toggleNavProgress(isShow, isRequestSpecfic=false, requestCode){
         $("#nav-bar-spinner").fadeIn();
     }
     else if(isRequestSpecfic==true){
-        updateStat();
         if(progressRequestCode==requestCode) $("#nav-bar-spinner").fadeOut();
     }
     else {
-        updateStat();
         $("#nav-bar-spinner").fadeOut();
     } 
 }
@@ -40,4 +38,16 @@ function onDatabaseError(){
 function toggleErrorAlert(isShow){
     if(isShow) $('.error-container').addClass("error-active");
     else $('.error-container').removeClass("error-active");
+}
+
+function toggleSideBar(){
+    if ($(".uk-offcanvas.uk-open")[0]){
+        UIkit.offcanvas("#side-bar").hide();
+    } else {
+        UIkit.offcanvas("#side-bar").show();
+    }
+}
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

@@ -1,0 +1,57 @@
+.checklist-checkbox{
+    width: 25px;
+    height: 25px;
+    border: 3px solid #b2b2b2;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.checklist-checkbox.active{
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    background-image: url('../images/checkbox-active-background.svg');
+    background-size: cover; 
+}
+
+.checklist-imagine{
+    border-radius: 10000px;
+    width: 30px;
+    height: 30px;
+    line-height: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #b2b2b2;
+}
+
+.checklist-imagine:active{
+    padding: 0px;
+}
+
+#not-given-list{
+    margin-bottom: 35px;
+}
+
+.divider{
+    height: 2px;
+    background: #d6d6d68c;
+    margin: 38px 0px 14px 0px;
+}
+
+.imagine-checkbox{
+    cursor: pointer;
+    opacity: 0.5;
+    line-height: 0px;
+    letter-spacing: -0.2em;
+    font-family: 'ps-regular';
+    transform: rotate(0deg);
+    transition-duration: 1s;
+    transition-timing-function: ease-in-out;
+}
+
+.imagine-checkbox.active{
+    transform: rotate(540deg);
+    color: var(--primary-color);
+    opacity: 1;
+}

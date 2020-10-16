@@ -32,6 +32,7 @@ button, button:active, input:focus, input:invalid{
     display: none;
 }
 
+/*---- Nav Bar ----*/
 .nav-bar{
     box-shadow: inset 0 -1px 0 0 #dadce0;
     height: 61px;
@@ -97,6 +98,7 @@ button, button:active, input:focus, input:invalid{
     padding-bottom: 20px;
 }
 
+/*---- Error Alert ----*/
 .error-container{
     transition-duration: 0.7s;
     overflow: hidden;
@@ -135,6 +137,7 @@ button, button:active, input:focus, input:invalid{
     height: 50px;
 }
 
+/*---- Checklist ----*/
 .checklist-item{
     padding: 8px 0px;
 }
@@ -166,22 +169,6 @@ button, button:active, input:focus, input:invalid{
     color: #b2b2b2;
     position: relative;
     left: 10px;
-}
-
-.checklist-checkbox{
-    width: 25px;
-    height: 25px;
-    border: 3px solid #b2b2b2;
-    background: transparent;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.checklist-checkbox.active{
-    border-color: var(--primary-color);
-    background-color: var(--primary-color);
-    background-image: url('../images/checkbox-active-background.svg');
-    background-size: cover; 
 }
 
 .checklist-title{
@@ -218,21 +205,6 @@ button, button:active, input:focus, input:invalid{
 
 .checklist-amount:focus{
     outline: none;
-}
-
-.checklist-imagine{
-    border-radius: 10000px;
-    width: 30px;
-    height: 30px;
-    line-height: 0;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: #b2b2b2;
-}
-
-.checklist-imagine:active{
-    padding: 0px;
 }
 
 .checklist-delete{
@@ -273,6 +245,7 @@ button, button:active, input:focus, input:invalid{
     }
 }
 
+/*---- List ----*/
 .list-container{
     padding-left: 8px;
     padding-right: 8px;
@@ -287,29 +260,48 @@ button, button:active, input:focus, input:invalid{
     opacity: 0.5;
 }
 
-#not-given-list{
-    margin-bottom: 35px;
+/*---- UI Kit ----*/
+.uk-offcanvas-bar {
+    background: #ffffff !important;
+    box-shadow: 0 28px 50px rgba(0,0,0,0.16);
+    padding: 0;
 }
 
-.divider{
-    height: 2px;
-    background: #d6d6d68c;
-    margin: 38px 0px 14px 0px;
+/*---- Side Bar ----*/
+.side-bar-menu-list{
+    margin-top: 20px;
 }
 
-.imagine-checkbox{
-    cursor: pointer;
-    opacity: 0.5;
-    line-height: 0px;
-    letter-spacing: -0.2em;
+.side-bar-menu-list button{
+    width: 85%;
+    height: 50px;
+    border-top-right-radius: 1000px;
+    border-bottom-right-radius: 1000px;
     font-family: 'ps-regular';
-    transform: rotate(0deg);
-    transition-duration: 1s;
-    transition-timing-function: ease-in-out;
+    font-size: 16px;
+    line-height: -1px;
+    background: transparent;
+    color: #5f6368;
+    text-align: left;
+    cursor: pointer;
+    padding-left: 31px;
+    margin-top: 5px;
+    transition-duration: 0.3s;
 }
 
-.imagine-checkbox.active{
-    transform: rotate(540deg);
-    color: var(--primary-color);
-    opacity: 1;
+.side-bar-menu-list button.active{
+    background: #fec00724;
+    color: #ffbf00;
+}
+
+.side-bar-menu-list button:hover{
+    background: #d6d6d635;
+}
+
+.side-bar-menu-list button span{
+    line-height: 0;
+    position: relative;
+    top: 5px;
+    right: 1px;
+    margin-right: 15px;
 }

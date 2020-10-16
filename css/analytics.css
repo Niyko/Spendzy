@@ -1,0 +1,22 @@
+.analytics-value-card{
+    border: 3px solid #d6d6d65c;
+    padding: 15px;
+    border-radius: 11px;
+}
+
+.analytics-value-card-title{
+    font-family: 'ps-regular';
+    margin: 0;
+    opacity: 0.8;
+}
+
+.analytics-value-card-value{
+    font-family: 'ps-regular';
+    margin: 0;
+    font-size: 29px;
+    color: #5f6368;
+}
+
+.analytics-value-card-donut{
+    width: 50px;
+}
