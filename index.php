@@ -79,7 +79,7 @@
         <script>
             var goalValue = 100000;
             var smallGraphCardTemplate = Handlebars.compile($("#small-graph-card-template").html());
-            var incomeData, expenseData;
+            var incomeData, expenseData, safekeepingData;
             $(function() {onload()});
 
             function onload(){
@@ -114,15 +114,24 @@
                                 resolve([]);
                             });
                     });
+                safekeepingData = await new Promise(function (resolve) {
+                        database.collection("safekeeping").get()
+                            .then((tableRows) => {
+                                rows = tableRows.docs.map(doc => Object.assign(
+                                    { table_id: doc.id },
+                                    doc.data()
+                                ));
+                                resolve(rows);
+                            }).catch(function(error) {
+                                resolve([]);
+                            });
+                    });
                 loadGraph();
             }
 
             function loadGraph(){
                 $("#graphs-container").html("");
-                totalGiven = 0;
-                totalNotGiven = 0;
-                totalIncome = 0;
-                totalExpense = 0;
+                totalGiven = 0, totalNotGiven = 0, totalIncome = 0, totalExpense = 0, totalSafekepping = 0;
                 for (var i = 0; i < incomeData.length; i++) {
                     totalIncome += parseInt(incomeData[i]["amount"]);
                     if(incomeData[i]["is_given"]) totalGiven += parseInt(incomeData[i]["amount"]);
@@ -131,12 +140,17 @@
                 for (var i = 0; i < expenseData.length; i++) {
                     totalExpense += parseInt(expenseData[i]["amount"]);
                 }
-                $("#graphs-container").append(getGraph("Bank balance", numberWithCommas(totalGiven-totalExpense), true, goalValue, (totalGiven-totalExpense)));
+                for (var i = 0; i < safekeepingData.length; i++) {
+                    totalSafekepping += parseInt(safekeepingData[i]["amount"]);
+                }
+                $("#graphs-container").append(getGraph("Bank balance", numberWithCommas((totalGiven-totalExpense)+totalSafekepping), true, goalValue, (totalGiven-totalExpense)));
+                $("#graphs-container").append(getGraph("Mine", numberWithCommas(totalGiven-totalExpense), true, goalValue, (totalGiven-totalExpense)));
                 $("#graphs-container").append(getGraph("Goal reached", (((totalGiven-totalExpense)/goalValue)*100).toFixed(0)+"%", true, goalValue, (totalGiven-totalExpense)));
                 $("#graphs-container").append(getGraph("Total income", numberWithCommas(totalIncome), true, (totalIncome+totalExpense), totalIncome));
                 $("#graphs-container").append(getGraph("Total expense", numberWithCommas(totalExpense), true, (totalIncome+totalExpense), totalExpense));
                 $("#graphs-container").append(getGraph("Total given", numberWithCommas(totalGiven), true, totalIncome, totalGiven));
                 $("#graphs-container").append(getGraph("To be given", numberWithCommas(totalNotGiven), true, totalIncome, totalNotGiven));
+                $("#graphs-container").append(getGraph("Safekeeping", numberWithCommas(totalSafekepping), false));
                 initGraphs();
                 toggleNavProgress(false);
                 $(".half-page").fadeIn();

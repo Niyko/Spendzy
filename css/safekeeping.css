@@ -1,0 +1,19 @@
+.checklist-item-description-container{
+    overflow: hidden;
+    height: 0px;
+    transition-duration: 0.3s;
+}
+
+.checklist-item-description-container.active{
+    height: 100px;
+}
+
+.checklist-item-description{
+    width: 100%;
+    border: none;
+    color: #666;
+    margin-top: 20px;
+    padding-bottom: 5px;
+    font-family: 'ps-regular';
+    border-bottom: 3px solid #d6d6d68c;
+}

@@ -17,6 +17,7 @@
             <button href="index.php" class="active"><span class="material-icons">donut_large</span> Analytics</button>
             <button href="income.php"><span class="material-icons">account_balance_wallet</span> Income</button>
             <button href="expense.php"><span class="material-icons">assessment</span> Expense</button>
+            <button href="safekeeping.php"><span class="material-icons">dns</span> Safekeeping</button>
         </div>
     </div>
 </div>
