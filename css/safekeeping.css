@@ -5,15 +5,22 @@
 }
 
 .checklist-item-description-container.active{
-    height: 100px;
+    height: 250px;
 }
 
 .checklist-item-description{
     width: 100%;
     border: none;
     color: #666;
+    height: 200px;
     margin-top: 20px;
     padding-bottom: 5px;
     font-family: 'ps-regular';
+    border-bottom: 3px solid #d6d6d68c;
+}
+
+.checklist-item-description:focus{
+    outline: none;
+    border: none;
     border-bottom: 3px solid #d6d6d68c;
 }
