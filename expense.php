@@ -6,6 +6,7 @@
         <?php add_css("css/expense.css"); ?>
     </head>
     <body>
+        <?php require('widgets/lockscreen.php'); ?>
         <div class="error-container">
             <div uk-grid class="error-inner">
                 <div class="uk-width-expand uk-flex uk-flex-middle">

@@ -1,10 +1,17 @@
+let lockscreenTimer;
+
 $(function() {
     initLockscreen();
+
+    $("body").mousemove(function(event){
+        if($(".lockscreen").is(":hidden")) initLockscreen();
+    });
 });
 
 function initLockscreen(){
-    $(".lockscreen").fadeOut();
-    setTimeout(function (){
+    $(".lockscreen").hide();
+    clearTimeout(lockscreenTimer);
+    lockscreenTimer = setTimeout(function (){
         $(".lockscreen").fadeIn();
     }, 20000);
 }
