@@ -1,3 +1,14 @@
+$(function() {
+    initLockscreen();
+});
+
+function initLockscreen(){
+    $(".lockscreen").fadeOut();
+    setTimeout(function (){
+        $(".lockscreen").fadeIn();
+    }, 20000);
+}
+
 function toggleNavProgress(isShow, isRequestSpecfic=false, requestCode){
     if(isShow) {
         progressRequestCode = requestCode;

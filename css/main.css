@@ -305,3 +305,30 @@ button, button:active, input:focus, input:invalid{
     right: 1px;
     margin-right: 15px;
 }
+
+/*---- Lockscreen ----*/
+.lockscreen{
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    background-color: #ffffff;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 10000;
+    user-select: none;
+}
+
+.lockscreen-inner{
+    width: 100vw;
+    height: 100vh;
+}
+
+.lockscreen p{
+    font-family: 'ps-regular';
+    font-size: 50px;
+    margin: 0;
+    padding: 0px;
+    line-height: 0px;
+    color: #5f6368;
+}

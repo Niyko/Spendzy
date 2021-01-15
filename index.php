@@ -6,6 +6,7 @@
         <?php add_css("css/analytics.css"); ?>
     </head>
     <body>
+        <?php require('widgets/lockscreen.php'); ?>
         <div class="error-container">
             <div uk-grid class="error-inner">
                 <div class="uk-width-expand uk-flex uk-flex-middle">
@@ -30,12 +31,6 @@
                         <svg width="1em" height="1em"><circle cx="0.5em" cy="0.5em" r="0.45em"/></svg>
                     </div>
                 </div>
-            </div>
-            <div class="uk-width-auto uk-flex uk-flex-middle">
-                <p class="nav-bar-stat-text" id="current-stat"></p>
-            </div>
-            <div class="uk-width-auto uk-flex uk-flex-middle">
-                <button class="nav-bar-icon-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">add</span></button>
             </div>
         </div>
         <div class="uk-flex uk-flex-center">
