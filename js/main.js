@@ -2,6 +2,10 @@ let lockscreenTimer;
 
 $(function() {
     initLockscreen();
+    
+    $("body").on({"touchstart" : function(){ 
+        if($(".lockscreen").is(":hidden")) initLockscreen();
+    }});
 
     $("body").mousemove(function(event){
         if($(".lockscreen").is(":hidden")) initLockscreen();
