@@ -6,4 +6,11 @@
     function add_script($file){
         echo "<script src='${file}?i=".filemtime($file)."'></script>";
     }
+
+    function add_all_scripts($folder){
+        $files = glob($folder.'/*.{js}', GLOB_BRACE);
+        foreach($files as $file) {
+            add_script($file);
+        }
+    }
 ?>

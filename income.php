@@ -25,6 +25,9 @@
                 <p class="nav-bar-title">Incomes</p>
             </div>
             <div class="uk-width-expand"></div>
+            <div class="uk-width-auto uk-flex uk-flex-middle">
+                <input name="sort-date" class="nav-bar-select" onchange="loadIncome()" type="text" data-toggle="monthpicker" value="<?php echo date('M Y'); ?>">
+            </div>
             <div class="uk-width-auto uk-flex uk-flex-middle" id="nav-bar-spinner">
                 <div class="spinner-container uk-flex uk-flex-middle uk-flex-center">
                     <div class="spinner">
@@ -32,12 +35,10 @@
                     </div>
                 </div>
             </div>
-            <div class="uk-width-auto uk-flex uk-flex-middle">
+            <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
                 <p class="nav-bar-stat-text" id="current-stat"></p>
             </div>
-            <div class="uk-width-auto uk-flex uk-flex-middle">
-                <button class="nav-bar-icon-btn ripple-effect" onclick="goToAddIncome()" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">add</span></button>
-            </div>
+            <?php require('widgets/isolate-nav-button.php'); ?>
         </div>
         <div class="uk-flex uk-flex-center">
             <div class="half-page uk-width-1-1 hide">
@@ -46,6 +47,9 @@
                         <div uk-grid>
                             <div class="uk-width-expand uk-flex uk-flex-middle">
                                 <input name="income-title" autocomplete="off" required type="text" placeholder="Title">
+                            </div>
+                            <div class="uk-width-expand uk-flex uk-flex-middle">
+                                <input name="income-date" autocomplete="off" required type="text" data-toggle="datepicker" placeholder="Date">
                             </div>
                             <div class="uk-width-expand uk-flex uk-flex-middle">
                                 <input name="income-amount" autocomplete="off" onkeyup="this.value=this.value.replace(/[^\d]/,'')" required type="tel" placeholder="Amount">
@@ -88,11 +92,22 @@
                         <div class="uk-width-expand uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('title', this, '{{this.table_id}}')" class="checklist-title" value="{{this.title}}">
                         </div>
-                        <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
+                        <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
+                            <input data-toggle="datepicker" onchange="onOtherDataChange('date', this, '{{this.table_id}}')" class="checklist-date" value="{{this.date}}">
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <button class="checklist-delete ripple-effect" ondblclick="deleteIncome(this, '{{this.table_id}}')" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">close</span></button>
+                            <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount isolated-value" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
+                        </div>
+                        <div class="uk-width-auto uk-flex uk-flex-middle">
+                            <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
+                            <div class="dropdown" uk-dropdown="mode: click">
+                                <ul class="uk-nav uk-dropdown-nav">
+                                    {{#if is_given}}
+                                        <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
+                                    {{/if}}
+                                    <li><a ondblclick="deleteIncome(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -106,13 +121,13 @@
         <?php require('widgets/side-bar.php'); ?>
         <?php require('widgets/scripts.php'); ?>
         <script>
-            var tableName = "income";
-            var checkAudio = new Audio("sounds/check.mp3");
-            var uncheckAudio = new Audio("sounds/uncheck.mp3");
-            var isImagineMode = false;
-            var progressRequestCode = "";
-            var listItemTemplate = Handlebars.compile($("#list-item-template").html());
-            var statTemplate = Handlebars.compile($("#stat-template").html());
+            let tableName = "income";
+            let checkAudio = new Audio("sounds/check.mp3");
+            let uncheckAudio = new Audio("sounds/uncheck.mp3");
+            let isImagineMode = false;
+            let progressRequestCode = "";
+            let listItemTemplate = Handlebars.compile($("#list-item-template").html());
+            let statTemplate = Handlebars.compile($("#stat-template").html());
             $(function() {onload()});
 
             function onload(){
@@ -124,118 +139,97 @@
                 updateStat();
             }
 
-            function goToAddIncome(){
-                $("input[name=income-title]").focus();
+            async function loadIncome(){
+                let rows = await new IncomeModel().get();
+                let isGivenRows = rows.filter(doc => {
+                    let rowMonth = moment(doc.date, "DD MMM YYYY").format("MMM YYYY");
+                    let sortMonth = $("[name=sort-date]").val();
+                    return (rowMonth==sortMonth);
+                });
+                isGivenRows = isGivenRows.filter(doc => doc.is_given==true);
+                let notGivenRows = rows.filter(doc => doc.is_given==false);
+                $("#given-list").html(listItemTemplate({ incomes: isGivenRows }));
+                $("#not-given-list").html(listItemTemplate({ incomes: notGivenRows }));
+                $(".half-page").fadeIn();
+                toggleNavProgress(false);
+                updateStat();
             }
 
-            function loadIncome(){
-                database.collection(tableName).get()
-                    .then((tableRows) => {
-                        rows = tableRows.docs.map(doc => Object.assign(
-                            { table_id: doc.id },
-                            doc.data()
-                        ));
-                        isGivenRows = rows.filter(doc => doc.is_given==true);
-                        notGivenRows = rows.filter(doc => doc.is_given==false);
-                        $("#given-list").html(listItemTemplate({ incomes: isGivenRows }));
-                        $("#not-given-list").html(listItemTemplate({ incomes: notGivenRows }));
-                        $(".half-page").fadeIn();
-                        toggleNavProgress(false);
-                        updateStat();
-                    }).catch(function(error) {
-                        onIncomeTableError();
-                    });
-            }
-
-            function addIncome(){
+            async function addIncome(){
                 toggleNavProgress(true);
-                var newIncome = {
+                let newIncome = {
                     amount: $("input[name=income-amount]").val(),
                     title: $("input[name=income-title]").val(),
                     is_given: false,
-                    date: "Turing",
+                    date: $("input[name=income-date]").val(),
                 };
-                database.collection(tableName).add(newIncome)
-                    .then(function(row) {
-                        newIncome["table_id"] = row.id
-                        $("#create-form").trigger("reset");
-                        $("#not-given-list").prepend(listItemTemplate({ incomes: [newIncome] }));             
-                        $("#not-given-list .checklist-item:first-child").addClass("animate__animated animate__fadeInDown");
-                        toggleNavProgress(false);
-                        updateStat();
-                    })
-                    .catch(function(error) {
-                        onIncomeTableError();
-                    });
+                let row = await new IncomeModel().insert(newIncome);
+                newIncome["table_id"] = row.id
+                $("#create-form").trigger("reset");
+                $("#not-given-list").prepend(listItemTemplate({ incomes: [newIncome] }));
+                $("#not-given-list .checklist-item:first-child").animateCSS("fadeInDown");
+                toggleNavProgress(false);
+                updateStat();
             }
 
-            function chechGiven(isGiven, e, id){
+            async function chechGiven(isGiven, e, id){
                 if(isGiven) checkAudio.play(0);
                 else uncheckAudio.play(0);
                 if(!isImagineMode){
                     toggleNavProgress(true, true, id);
-                    database.collection(tableName).doc(id).update({is_given: isGiven}).then(function() {
-                            toggleNavProgress(false, true, id);
-                            updateStat();
-                        }).catch(function(error) {
-                            onIncomeTableError();
-                        });
+                    let row = await new IncomeModel().update(id, "is_given", isGiven);
+                    toggleNavProgress(false, true, id);
+                    updateStat();
                 }
                 $(e).toggleClass("active");
                 $(e).closest(".checklist-item").prependTo((isGiven?"#given-list":"#not-given-list"));
-                $(e).closest(".checklist-item").addClass("animate__animated animate__fadeInDown");
+                $(e).closest(".checklist-item").animateCSS("fadeInDown");
                 $(e).attr("onclick", `chechGiven(!${isGiven}, this, '${id}')`);
                 if(isImagineMode) updateStat();
             }
 
-            function onOtherDataChange(dataKey, e, id){
+            async function onOtherDataChange(dataKey, e, id){
                 toggleNavProgress(true, true, id);
-                database.collection(tableName).doc(id).update({[dataKey]: $(e).val()}).then(function() {
-                        toggleNavProgress(false, true, id);
-                        updateStat();
-                    }).catch(function(error) {
-                        onIncomeTableError();
-                    });
+                let row = await new IncomeModel().update(id, dataKey, $(e).val());
+                toggleNavProgress(false, true, id);
+                updateStat();
                 $(e).blur(); 
             }
 
-            function deleteIncome(e, id){
+            async function addToLog(e, id){
+                let newLog = {
+                    amount: $(e).closest(".checklist-item").find(".checklist-amount").val(),
+                    title: $(e).closest(".checklist-item").find(".checklist-title").val(),
+                    type: "income",
+                    date: $(e).closest(".checklist-item").find(".checklist-date").val(),
+                };
                 toggleNavProgress(true, true, id);
-                database.collection(tableName).doc(id).delete().then(function() {
-                        toggleNavProgress(false, true, id);
-                        updateStat();
-                    }).catch(function(error) {
-                        onIncomeTableError();
-                    });
+                let row = await new LogbackModel().insert(newLog);
+                toggleNavProgress(false, true, id);
+                updateStat();
                 $(e).closest(".checklist-item").addClass("checklist-item-deleted");
             }
 
-            function updateStat(){
-                var totalIncome = 0, totalGiven = 0;
-                database.collection(tableName).get()
-                    .then((tableRows) => {
-                        tableRows.forEach((row) => {
-                            totalIncome += parseInt(row.data().amount);
-                            if(row.data().is_given) totalGiven += parseInt(row.data().amount);
-                        });
-                        if(isImagineMode){
-                            totalGiven = 0;
-                            $("#given-list .checklist-amount").each(function(index) {
-                                totalGiven += parseInt($(this).val());
-                            });
-                        }
-                        $("#current-stat").html(statTemplate({ 
-                            total_given: nFormatter(totalGiven, 1),
-                            total_income: nFormatter(totalIncome, 1),
-                        }));
-                    }).catch(function(error) {
-                        onIncomeTableError();
-                    });
+            async function deleteIncome(e, id){
+                toggleNavProgress(true, true, id);
+                let status = await new IncomeModel().delete(id);
+                toggleNavProgress(false, true, id);
+                updateStat();
+                $(e).closest(".checklist-item").addClass("checklist-item-deleted");
             }
 
-            function onIncomeTableError(){
-                loadIncome();
-                onDatabaseError();
+            async function updateStat(){
+                let statistics = await new IncomeModel().getStatistics();
+                if(isImagineMode){
+                    statistics.totalGiven = 0;
+                    $("#given-list .checklist-amount").each(function(index) {
+                        statistics.totalGiven += parseInt($(this).val());
+                    });
+                }
+                $("#current-stat").html(statTemplate({ 
+                    total_given: nFormatter(statistics.totalGiven, 1),
+                    total_income: nFormatter(statistics.totalIncome, 1),
+                }));
             }
 
             function toggleImagineMode(){

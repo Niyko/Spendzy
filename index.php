@@ -32,6 +32,7 @@
                     </div>
                 </div>
             </div>
+            <?php require('widgets/isolate-nav-button.php'); ?>
         </div>
         <div class="uk-flex uk-flex-center">
             <div class="half-page uk-width-1-1 uk-margin-top hide">
@@ -47,7 +48,7 @@
                     <div uk-grid>
                         <div class="uk-width-expand">
                             <p class="analytics-value-card-title">{{title}}</p>
-                            <p class="analytics-value-card-value">{{value}}</p>
+                            <p class="analytics-value-card-value isolated-value">{{value}}</p>
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             {{#if is_graph}}
@@ -58,8 +59,7 @@
                                     data-value={{graph_value}}
                                     data-color="#fec007"
                                     data-bg="#f0f0f0"
-                                    data-radius=55
-                                    >
+                                    data-radius=55>
                                 </div>
                             {{/if}}
                         </div>
@@ -70,11 +70,12 @@
         
         <?php require('widgets/side-bar.php'); ?>
         <?php require('widgets/scripts.php'); ?>
-        <script src="js/donutty.js"></script>
+        <?php add_script("js/packages/donutty.js"); ?>
+        <?php add_script("js/models/income.js"); ?>
         <script>
-            var goalValue = 100000;
-            var smallGraphCardTemplate = Handlebars.compile($("#small-graph-card-template").html());
-            var incomeData, expenseData, safekeepingData;
+            let goalValue = 100000;
+            let smallGraphCardTemplate = Handlebars.compile($("#small-graph-card-template").html());
+            let incomeData, expenseData, safekeepingData;
             $(function() {onload()});
 
             function onload(){
@@ -85,42 +86,9 @@
             }
 
             async function loadData(){
-                incomeData = await new Promise(function (resolve) {
-                        database.collection("income").get()
-                            .then((tableRows) => {
-                                rows = tableRows.docs.map(doc => Object.assign(
-                                    { table_id: doc.id },
-                                    doc.data()
-                                ));
-                                resolve(rows);
-                            }).catch(function(error) {
-                                resolve([]);
-                            });
-                    });
-                expenseData = await new Promise(function (resolve) {
-                        database.collection("expense").get()
-                            .then((tableRows) => {
-                                rows = tableRows.docs.map(doc => Object.assign(
-                                    { table_id: doc.id },
-                                    doc.data()
-                                ));
-                                resolve(rows);
-                            }).catch(function(error) {
-                                resolve([]);
-                            });
-                    });
-                safekeepingData = await new Promise(function (resolve) {
-                        database.collection("safekeeping").get()
-                            .then((tableRows) => {
-                                rows = tableRows.docs.map(doc => Object.assign(
-                                    { table_id: doc.id },
-                                    doc.data()
-                                ));
-                                resolve(rows);
-                            }).catch(function(error) {
-                                resolve([]);
-                            });
-                    });
+                incomeData = await new IncomeModel().get();
+                expenseData = await new ExpenseModel().get();
+                safekeepingData = await new SafekeepingModel().get();
                 loadGraph();
             }
 

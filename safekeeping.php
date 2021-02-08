@@ -35,9 +35,7 @@
             <div class="uk-width-auto uk-flex uk-flex-middle">
                 <p class="nav-bar-stat-text" id="current-stat"></p>
             </div>
-            <div class="uk-width-auto uk-flex uk-flex-middle">
-                <button class="nav-bar-icon-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">add</span></button>
-            </div>
+            <?php require('widgets/isolate-nav-button.php'); ?>
         </div>
         <div class="uk-flex uk-flex-center">
             <div class="half-page uk-width-1-1 hide">
@@ -46,6 +44,9 @@
                         <div uk-grid>
                             <div class="uk-width-expand uk-flex uk-flex-middle">
                                 <input name="safekeeping-title" autocomplete="off" required type="text" placeholder="Title">
+                            </div>
+                            <div class="uk-width-expand uk-flex uk-flex-middle">
+                                <input name="safekeeping-date" autocomplete="off" required type="text" data-toggle="datepicker" placeholder="Date">
                             </div>
                             <div class="uk-width-expand uk-flex uk-flex-middle">
                                 <input name="safekeeping-amount" autocomplete="off" onkeyup="this.value=this.value.replace(/[^\d]/,'')" required type="tel" placeholder="Amount">
@@ -74,11 +75,20 @@
                         <div class="uk-width-expand uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('title', this, '{{this.table_id}}')" class="checklist-title" value="{{this.title}}">
                         </div>
+                        <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
+                            <input data-toggle="datepicker" onchange="onOtherDataChange('date', this, '{{this.table_id}}')" class="checklist-date" value="{{this.date}}">
+                        </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <button class="checklist-delete ripple-effect" ondblclick="deleteSafekeeping(this, '{{this.table_id}}')" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">close</span></button>
+                        <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
+                            <div class="dropdown" uk-dropdown="mode: click">
+                                <ul class="uk-nav uk-dropdown-nav">
+                                    <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
+                                    <li><a onclick="deleteSafekeeping(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div class="checklist-item-description-container">
@@ -107,89 +117,71 @@
                 loadSafekeeping();
             }
 
-            function loadSafekeeping(){
-                database.collection(tableName).get()
-                    .then((tableRows) => {
-                        rows = tableRows.docs.map(doc => Object.assign(
-                            { table_id: doc.id },
-                            doc.data()
-                        ));
-                        $("#safekeeping-list").html(listItemTemplate({ safekeepings: rows }));
-                        $(".half-page").fadeIn();
-                        toggleNavProgress(false);
-                        updateStat();
-                    }).catch(function(error) {
-                        onSafekeepingTableError();
-                    });
+            async function loadSafekeeping(){
+                let rows = await new SafekeepingModel().get();
+                $("#safekeeping-list").html(listItemTemplate({ safekeepings: rows }));
+                $(".half-page").fadeIn();
+                toggleNavProgress(false);
+                updateStat();
             }
 
-            function addSafekeeping(){
+            async function addSafekeeping(){
                 toggleNavProgress(true);
-                var newSafekeeping = {
+                let newSafekeeping = {
                     amount: $("input[name=safekeeping-amount]").val(),
                     title: $("input[name=safekeeping-title]").val(),
                     description: "",
-                    date: "Turing",
+                    date: $("input[name=safekeeping-date]").val(),
                 };
-                database.collection(tableName).add(newSafekeeping)
-                    .then(function(row) {
-                        newSafekeeping["table_id"] = row.id
-                        $("#create-form").trigger("reset");
-                        $("#safekeeping-list").prepend(listItemTemplate({ safekeepings: [newSafekeeping] }));             
-                        $("#safekeeping-list .checklist-item:first-child").addClass("animate__animated animate__fadeInDown");
-                        toggleNavProgress(false);
-                        updateStat();
-                    })
-                    .catch(function(error) {
-                        onSafekeepingTableError();
-                    });
+                let row = await new SafekeepingModel().insert(newSafekeeping);
+                newSafekeeping["table_id"] = row.id
+                $("#create-form").trigger("reset");
+                $("#safekeeping-list").prepend(listItemTemplate({ safekeepings: [newSafekeeping] }));             
+                $("#safekeeping-list .checklist-item:first-child").animateCSS("fadeInDown");
+                toggleNavProgress(false);
+                updateStat();
                 $("input[name=safekeeping-amount]").blur(); 
             }
 
-            function onOtherDataChange(dataKey, e, id){
+            async function onOtherDataChange(dataKey, e, id){
                 toggleNavProgress(true, true, id);
-                database.collection(tableName).doc(id).update({[dataKey]: $(e).val()}).then(function() {
-                        toggleNavProgress(false, true, id);
-                        updateStat();
-                    }).catch(function(error) {
-                        onSafekeepingTableError();
-                    });
+                let row = await new SafekeepingModel().update(id, dataKey, $(e).val());
+                toggleNavProgress(false, true, id);
+                updateStat();
                 $(e).blur(); 
             }
 
-            function deleteSafekeeping(e, id){
+            async function deleteSafekeeping(e, id){
                 toggleNavProgress(true, true, id);
-                database.collection(tableName).doc(id).delete().then(function() {
-                        toggleNavProgress(false, true, id);
-                        updateStat();
-                    }).catch(function(error) {
-                        onSafekeepingTableError();
-                    });
+                let status = await new SafekeepingModel().delete(id);
+                toggleNavProgress(false, true, id);
+                updateStat();
                 $(e).closest(".checklist-item").addClass("checklist-item-deleted");
             }
 
-            function updateStat(){
-                var totalSafekeeping = 0;
-                database.collection(tableName).get()
-                    .then((tableRows) => {
-                        tableRows.forEach((row) => {
-                            totalSafekeeping += parseInt(row.data().amount);
-                        });
-                        $("#current-stat").html(statTemplate({
-                            total_safekeeping: nFormatter(totalSafekeeping, 1),
-                        }));
-                    }).catch(function(error) {
-                        onSafekeepingTableError();
-                    });
+            async function updateStat(){
+                let totalSafekeeping = await new SafekeepingModel().getTotal();
+                $("#current-stat").html(statTemplate({
+                    total_safekeeping: nFormatter(totalSafekeeping, 1),
+                }));
+            }
+
+            async function addToLog(e, id){
+                let newLog = {
+                    amount: $(e).closest(".checklist-item").find(".checklist-amount").val(),
+                    title: $(e).closest(".checklist-item").find(".checklist-title").val(),
+                    type: "safekeeping",
+                    date: $(e).closest(".checklist-item").find(".checklist-date").val(),
+                };
+                toggleNavProgress(true, true, id);
+                let row = await new LogbackModel().insert(newLog);
+                toggleNavProgress(false, true, id);
+                updateStat();
+                $(e).closest(".checklist-item").addClass("checklist-item-deleted");
             }
 
             function toggleInfo(e){
                 $(e).closest(".checklist-item").find(".checklist-item-description-container").toggleClass('active');
-            }
-
-            function onSafekeepingTableError(){
-                loadSafekeeping();
-                onDatabaseError();
             }
         </script>
     </body>

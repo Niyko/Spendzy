@@ -77,9 +77,44 @@ button, button:active, input:focus, input:invalid{
     color: #5f6368;
 }
 
+.nav-bar-input{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #ffffff;
+    height: 34px;
+    padding: 0px 11px;
+    font-family: 'ps-regular';
+    color: #5f6368;
+    border-radius: 5px;
+    border: 1px solid #dadce0;
+    font-size: 14px;
+    width: 60px;
+}
+
+.nav-bar-select{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #ffffff;
+    padding: 0 10px;
+    height: 40px;
+    padding-right: 35px;
+    font-family: 'ps-regular';
+    width: 58px;
+    color: #5f6368;
+    font-size: 14px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2224%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2016%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%20%20%20%20%3Cpolygon%20fill%3D%22%23666%22%20points%3D%2212%201%209%206%2015%206%22%20%2F%3E%0A%20%20%20%20%3Cpolygon%20fill%3D%22%23666%22%20points%3D%2212%2013%209%208%2015%208%22%20%2F%3E%0A%3C%2Fsvg%3E%0A");
+    border-radius: 5px;
+    border: 1px solid #dadce0;
+    background-repeat: no-repeat;
+    background-position: 100% 50%;
+}
+
+.nav-bar-select option{
+    font-family: 'ps-regular';
+}
+
 .nav-bar-stat-text{
     font-family: 'ps-regular';
-    text-transform: uppercase;
     font-size: 15px;
     margin: 0;
     padding: 0px;
@@ -93,7 +128,7 @@ button, button:active, input:focus, input:invalid{
 }
 
 .half-page{
-    max-width: 550px;
+    max-width: 680px;
     padding: 0px 10px 0px 10px;
     padding-bottom: 20px;
 }
@@ -140,6 +175,7 @@ button, button:active, input:focus, input:invalid{
 /*---- Checklist ----*/
 .checklist-item{
     padding: 8px 0px;
+    overflow: hidden !important;
 }
 
 .checklist-create-card{
@@ -171,7 +207,7 @@ button, button:active, input:focus, input:invalid{
     left: 10px;
 }
 
-.checklist-title{
+.checklist-title, .checklist-date, .checklist-amount{
     font-size: 17px;
     border: none;
     width: inherit;
@@ -184,16 +220,13 @@ button, button:active, input:focus, input:invalid{
 }
 
 .checklist-amount{
-    font-size: 17px;
-    border: none;
     width: 60px;
     text-align: right;
-    color: #000;
-    font-family: 'ps-regular';
-    opacity: 0.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+.checklist-date{
+    width: 130px;
+    opacity: 0.4;
 }
 
 .checklist-amount-currency{
@@ -225,6 +258,7 @@ button, button:active, input:focus, input:invalid{
 
 .checklist-item-deleted{
     overflow: hidden;
+    padding: 0;
     animation: 1s deletedChecklistAnim forwards;
 }
 
@@ -331,4 +365,53 @@ button, button:active, input:focus, input:invalid{
     padding: 0px;
     line-height: 0px;
     color: #5f6368;
+}
+
+/*---- Isolated Value ----*/
+.isolated-hidden-value{
+    color: rgba(0, 0, 0, 0) !important;
+    background: #f0f0f0;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/*---- Dropdown ----*/
+.dropdown {
+    padding: 0px;
+    border-radius: 10px;
+    z-index: 1000 !important;
+    overflow: hidden;
+    border: 0px solid transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.dropdown li {
+    padding: 15px 0px;
+    transition-duration: 0.3s;
+}
+
+.dropdown li:hover{
+    background: #d6d6d65c;
+}
+
+.dropdown li:not(:first-child) {
+    border-top: 1px solid #dadce0;
+}
+
+.dropdown a {
+    font-family: 'ps-regular';
+    color: #5f6368 !important;
+    font-size: 15px;
+    line-height: 15px;
+    padding: 0px 25px !important;
+}
+
+.dropdown a span {
+    position: relative;
+    top: 5px;
+    line-height: 0;
+    left: -7px;
 }
