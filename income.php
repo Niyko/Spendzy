@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
-                <p class="nav-bar-stat-text" id="current-stat"></p>
+                <p class="nav-bar-stat-text isolated-value" id="current-stat"></p>
             </div>
             <?php require('widgets/isolate-nav-button.php'); ?>
         </div>
@@ -63,6 +63,8 @@
                 <div class="list-container">
                     <p class="list-title">To be given</p>
                     <div id="not-given-list"><!--- List render from JS ---></div>
+                    <p class="list-title">Recurring income</p>
+                    <div id="recurring-list"><!--- List render from JS ---></div>
                     <p class="list-title">Already given</p>
                     <div id="given-list"><!--- List render from JS ---></div>
                     <div class="divider"></div>
@@ -83,12 +85,14 @@
         </template>
 
         <template hidden id="list-item-template">
-            {{#each incomes}}
+            {{#each rows}}
                 <div class="checklist-item">
                     <div uk-grid class="uk-grid-small">
-                        <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <button onclick="chechGiven(!{{this.is_given}}, this, '{{this.table_id}}')" class="checklist-checkbox {{#if this.is_given}}active{{/if}}"></button>
-                        </div>
+                        {{#unless is_recurring}}
+                            <div class="uk-width-auto uk-flex uk-flex-middle">
+                                <button onclick="chechGiven(!{{this.is_given}}, this, '{{this.table_id}}')" class="checklist-checkbox {{#if this.is_given}}active{{/if}}"></button>
+                            </div>
+                        {{/unless}}
                         <div class="uk-width-expand uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('title', this, '{{this.table_id}}')" class="checklist-title" value="{{this.title}}">
                         </div>
@@ -99,15 +103,21 @@
                             <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount isolated-value" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
-                            <div class="dropdown" uk-dropdown="mode: click">
-                                <ul class="uk-nav uk-dropdown-nav">
-                                    {{#if is_given}}
-                                        <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
-                                    {{/if}}
-                                    <li><a ondblclick="deleteIncome(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
-                                </ul>
-                            </div>
+                            {{#if is_recurring}}
+                                {{#unless is_issued}}
+                                    <button onclick="issueRecuringIncome(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
+                                {{/unless}}
+                            {{else}}
+                                <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
+                                <div class="dropdown" uk-dropdown="mode: click">
+                                    <ul class="uk-nav uk-dropdown-nav">
+                                        {{#if is_given}}
+                                            <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
+                                        {{/if}}
+                                        <li><a ondblclick="deleteIncome(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
+                                    </ul>
+                                </div>
+                            {{/if}}
                         </div>
                     </div>
                 </div>
@@ -121,11 +131,11 @@
         <?php require('widgets/side-bar.php'); ?>
         <?php require('widgets/scripts.php'); ?>
         <script>
-            let tableName = "income";
             let checkAudio = new Audio("sounds/check.mp3");
             let uncheckAudio = new Audio("sounds/uncheck.mp3");
             let isImagineMode = false;
             let progressRequestCode = "";
+            let incomeTitleList = [];
             let listItemTemplate = Handlebars.compile($("#list-item-template").html());
             let statTemplate = Handlebars.compile($("#stat-template").html());
             $(function() {onload()});
@@ -134,22 +144,34 @@
                 $.ripple(".ripple-effect", {
                     multi: true, 
                 });
-
                 loadIncome();
+                loadRecurringIncome();
                 updateStat();
+            }
+
+            async function loadRecurringIncome(){
+                let rows = await new RecurringIncomeModel().get();
+                rows.forEach((row, index) => {
+                    if(incomeTitleList.includes(row.title)) rows[index]["is_issued"] = true;
+                });
+                $("#recurring-list").html(listItemTemplate({ rows }));
             }
 
             async function loadIncome(){
                 let rows = await new IncomeModel().get();
+                incomeTitleList = [];
                 let isGivenRows = rows.filter(doc => {
                     let rowMonth = moment(doc.date, "DD MMM YYYY").format("MMM YYYY");
                     let sortMonth = $("[name=sort-date]").val();
                     return (rowMonth==sortMonth);
                 });
-                isGivenRows = isGivenRows.filter(doc => doc.is_given==true);
+                isGivenRows = isGivenRows.filter(doc => {
+                    if(doc.is_given) incomeTitleList.push(doc.title);
+                    return doc.is_given==true;
+                });
                 let notGivenRows = rows.filter(doc => doc.is_given==false);
-                $("#given-list").html(listItemTemplate({ incomes: isGivenRows }));
-                $("#not-given-list").html(listItemTemplate({ incomes: notGivenRows }));
+                $("#given-list").html(listItemTemplate({ rows: isGivenRows }));
+                $("#not-given-list").html(listItemTemplate({ rows: notGivenRows }));
                 $(".half-page").fadeIn();
                 toggleNavProgress(false);
                 updateStat();
@@ -166,7 +188,7 @@
                 let row = await new IncomeModel().insert(newIncome);
                 newIncome["table_id"] = row.id
                 $("#create-form").trigger("reset");
-                $("#not-given-list").prepend(listItemTemplate({ incomes: [newIncome] }));
+                $("#not-given-list").prepend(listItemTemplate({ rows: [newIncome] }));
                 $("#not-given-list .checklist-item:first-child").animateCSS("fadeInDown");
                 toggleNavProgress(false);
                 updateStat();
@@ -196,6 +218,23 @@
                 $(e).blur(); 
             }
 
+            async function issueRecuringIncome(e){
+                toggleNavProgress(true);
+                let newIncome = {
+                    amount: $(e).closest(".checklist-item").find(".checklist-amount").val(),
+                    title: $(e).closest(".checklist-item").find(".checklist-title").val(),
+                    type: "income",
+                    is_given: true,
+                    date: moment().format("DD MMM YYYY"),
+                };
+                let row = await new IncomeModel().insert(newIncome);
+                $("#given-list").prepend(listItemTemplate({ rows: [newIncome] }));
+                $("#given-list .checklist-item:first-child").animateCSS("fadeInDown");
+                $(e).hide();
+                toggleNavProgress(false);
+                updateStat();
+            }
+
             async function addToLog(e, id){
                 let newLog = {
                     amount: $(e).closest(".checklist-item").find(".checklist-amount").val(),
@@ -203,9 +242,9 @@
                     type: "income",
                     date: $(e).closest(".checklist-item").find(".checklist-date").val(),
                 };
-                toggleNavProgress(true, true, id);
+                toggleNavProgress(true);
                 let row = await new LogbackModel().insert(newLog);
-                toggleNavProgress(false, true, id);
+                toggleNavProgress(false);
                 updateStat();
                 $(e).closest(".checklist-item").addClass("checklist-item-deleted");
             }

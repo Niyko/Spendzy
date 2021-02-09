@@ -240,6 +240,20 @@ button, button:active, input:focus, input:invalid{
     outline: none;
 }
 
+.checklist-btn{
+    background: var(--primary-color);
+    color: #fff;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border-radius: 4px;
+    font-family: 'ps-regular';
+    letter-spacing: 0.088em;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 10px;
+}
+
 .checklist-delete{
     border-radius: 10000px;
     width: 30px;
@@ -373,6 +387,7 @@ button, button:active, input:focus, input:invalid{
     background: #f0f0f0;
     border-radius: 3px;
     cursor: pointer;
+    line-height: 24px;
 }
 
 /*---- Dropdown ----*/

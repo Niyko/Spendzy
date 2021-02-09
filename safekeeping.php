@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="uk-width-auto uk-flex uk-flex-middle">
-                <p class="nav-bar-stat-text" id="current-stat"></p>
+                <p class="nav-bar-stat-text isolated-value" id="current-stat"></p>
             </div>
             <?php require('widgets/isolate-nav-button.php'); ?>
         </div>
@@ -79,7 +79,7 @@
                             <input data-toggle="datepicker" onchange="onOtherDataChange('date', this, '{{this.table_id}}')" class="checklist-date" value="{{this.date}}">
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
+                            <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount isolated-value" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                         <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
@@ -105,9 +105,8 @@
         <?php require('widgets/side-bar.php'); ?>
         <?php require('widgets/scripts.php'); ?>
         <script>
-            var tableName = "safekeeping";
-            var listItemTemplate = Handlebars.compile($("#list-item-template").html());
-            var statTemplate = Handlebars.compile($("#stat-template").html());
+            let listItemTemplate = Handlebars.compile($("#list-item-template").html());
+            let statTemplate = Handlebars.compile($("#stat-template").html());
             $(function() {onload()});
 
             function onload(){

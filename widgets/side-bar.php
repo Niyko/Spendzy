@@ -18,6 +18,7 @@
             <button href="income.php"><span class="material-icons">account_balance_wallet</span> Income</button>
             <button href="expense.php"><span class="material-icons">assessment</span> Expense</button>
             <button href="safekeeping.php"><span class="material-icons">dns</span> Safekeeping</button>
+            <button href="fund.php"><span class="material-icons">account_balance</span> Hedge fund</button>
         </div>
     </div>
 </div>

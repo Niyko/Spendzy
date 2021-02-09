@@ -1,7 +1,7 @@
-class ExpenseModel extends Model {
+class FundModel extends Model {
     config() {
         return {
-            table: "expense"
+            table: "fund"
         };
     }
 
@@ -11,10 +11,10 @@ class ExpenseModel extends Model {
 
     async getTotal(){
         let rows = await this.get();
-        let totalExpense = 0;
+        let totalFund = 0;
         rows.forEach(function (row) {
-            totalExpense += parseInt(row.amount);
+            totalFund += parseInt(row.amount);
         });
-        return totalExpense;
+        return totalFund;
     }
 }

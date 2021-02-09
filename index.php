@@ -71,11 +71,9 @@
         <?php require('widgets/side-bar.php'); ?>
         <?php require('widgets/scripts.php'); ?>
         <?php add_script("js/packages/donutty.js"); ?>
-        <?php add_script("js/models/income.js"); ?>
         <script>
-            let goalValue = 100000;
             let smallGraphCardTemplate = Handlebars.compile($("#small-graph-card-template").html());
-            let incomeData, expenseData, safekeepingData;
+            let incomeData, expenseData, safekeepingData, configData;
             $(function() {onload()});
 
             function onload(){
@@ -89,12 +87,14 @@
                 incomeData = await new IncomeModel().get();
                 expenseData = await new ExpenseModel().get();
                 safekeepingData = await new SafekeepingModel().get();
+                configData = await new ConfigModel().getConfigs();
                 loadGraph();
             }
 
-            function loadGraph(){
+            async function loadGraph(){
                 $("#graphs-container").html("");
-                totalGiven = 0, totalNotGiven = 0, totalIncome = 0, totalExpense = 0, totalSafekepping = 0;
+                let totalGiven = 0, totalNotGiven = 0, totalIncome = 0, totalExpense = 0, totalSafekepping = 0;
+                let goalValue = parseInt(configData["goal-amount"]);
                 for (var i = 0; i < incomeData.length; i++) {
                     totalIncome += parseInt(incomeData[i]["amount"]);
                     if(incomeData[i]["is_given"]) totalGiven += parseInt(incomeData[i]["amount"]);
@@ -106,6 +106,7 @@
                 for (var i = 0; i < safekeepingData.length; i++) {
                     totalSafekepping += parseInt(safekeepingData[i]["amount"]);
                 }
+                let totalFund = await new FundModel().getTotal();
                 $("#graphs-container").append(getGraph("Bank balance", numberWithCommas((totalGiven-totalExpense)+totalSafekepping), true, goalValue, (totalGiven-totalExpense)));
                 $("#graphs-container").append(getGraph("Mine", numberWithCommas(totalGiven-totalExpense), true, goalValue, (totalGiven-totalExpense)));
                 $("#graphs-container").append(getGraph("Goal reached", (((totalGiven-totalExpense)/goalValue)*100).toFixed(0)+"%", true, goalValue, (totalGiven-totalExpense)));
@@ -114,6 +115,7 @@
                 $("#graphs-container").append(getGraph("Total given", numberWithCommas(totalGiven), true, totalIncome, totalGiven));
                 $("#graphs-container").append(getGraph("To be given", numberWithCommas(totalNotGiven), true, totalIncome, totalNotGiven));
                 $("#graphs-container").append(getGraph("Safekeeping", numberWithCommas(totalSafekepping), false));
+                $("#graphs-container").append(getGraph("Hedge fund", numberWithCommas(totalFund), false));
                 initGraphs();
                 toggleNavProgress(false);
                 $(".half-page").fadeIn();
