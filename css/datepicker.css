@@ -403,7 +403,7 @@
  */
 .picker__footer {
   text-align: center;
-  display: none;
+  /* display: none; */
 }
 .picker__button--today,
 .picker__button--clear,
@@ -477,3 +477,28 @@
 /* ==========================================================================
    $DEFAULT-DATE-PICKER
    ========================================================================== */
+
+
+.picker__button--clear {
+  font-size: 16px;
+  text-align: left;
+  line-height: 1.2;
+  color: #5f6368;
+  font-family: 'ps-regular';
+}
+
+.picker__footer{
+  margin-top: -10px;
+  border-top: 1px solid #dadce0;
+}
+
+.picker__button--clear:hover{
+  background: transparent;
+}
+
+.picker__button--clear::before {
+  top: -0.05em;
+  width: 0;
+  border-top: 0.66em solid #ffc106;
+  border-left: .66em solid transparent;
+}

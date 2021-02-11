@@ -127,6 +127,41 @@ button, button:active, input:focus, input:invalid{
     opacity: 0.7;
 }
 
+.nav-bar-search-box{
+    padding: 0px;
+    height: 40px;
+    width: 85%;
+    border-radius: 5px;
+    border: 1px solid #dadce0;
+    max-width: 450px;
+    overflow: hidden;
+    transition-duration: 0.3s;
+    transform: translateY(-60px);
+}
+
+.nav-bar-search-box.active{
+    transform: translateY(0px);
+}
+
+.nav-bar-search-box button{
+    position: relative;
+    left: -6px;
+    top: 2px;
+}
+
+.nav-bar-search-box input{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-family: 'ps-regular';
+    font-family: 'ps-regular';
+    color: #5f6368;
+    font-size: 16px;
+    height: 37px;
+    border: none;
+    outline: none;
+}
+
+/*---- Page ----*/
 .half-page{
     max-width: 680px;
     padding: 0px 10px 0px 10px;
@@ -274,6 +309,10 @@ button, button:active, input:focus, input:invalid{
     overflow: hidden;
     padding: 0;
     animation: 1s deletedChecklistAnim forwards;
+}
+
+.checklist-item-search-hide{
+    display: none !important;
 }
 
 @keyframes deletedChecklistAnim {

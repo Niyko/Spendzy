@@ -24,9 +24,21 @@
             <div class="uk-width-auto uk-flex uk-flex-middle">
                 <p class="nav-bar-title">Expense</p>
             </div>
-            <div class="uk-width-expand"></div>
+            <div class="uk-width-expand uk-flex uk-flex-center uk-flex-middle">
+                <div class="nav-bar-search-box uk-grid-small" uk-grid>
+                    <div class="uk-width-expand">
+                        <input class="nav-bar-search-input" oninput="searchOnList()" type="text" value="" placeholder="Search" autocomplete="off">
+                    </div>
+                    <div class="uk-width-auto">
+                        <button class="checklist-create-card-btn ripple-effect" onclick="toggleSearchBox(false)" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">close</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
+                <button class="nav-bar-icon-btn ripple-effect" onclick="toggleSearchBox(true)" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">search</span></button>
+            </div>
             <div class="uk-width-auto uk-flex uk-flex-middle">
-                <input name="sort-date" class="nav-bar-select" onchange="loadExpense()" type="text" data-toggle="monthpicker" value="<?php echo date('M Y'); ?>">
+                <input name="sort-date" class="nav-bar-select" onchange="if(this.value==''){ this.value = 'View all'; } loadExpense();" type="text" data-toggle="monthpicker" value="<?php echo date('M Y'); ?>">
             </div>
             <div class="uk-width-auto uk-flex uk-flex-middle" id="nav-bar-spinner">
                 <div class="spinner-container uk-flex uk-flex-middle uk-flex-center">
@@ -63,6 +75,8 @@
                 <div class="list-container">
                     <p class="list-title">All Expense</p>
                     <div id="expense-list"><!--- List render from JS ---></div>
+                    <p class="list-title">Recurring income</p>
+                    <div id="recurring-list"><!--- List render from JS ---></div>
                 </div>
             </div>
         </div>
@@ -78,17 +92,28 @@
                         <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
                             <input data-toggle="datepicker" onchange="onOtherDataChange('date', this, '{{this.table_id}}')" class="checklist-date" value="{{this.date}}">
                         </div>
+                        {{#if is_recurring}}
+                            {{#if is_issued}}
+                                <div class="uk-width-auto uk-flex uk-flex-middle">
+                                    <p><span class="material-icons">done_all</span></p>
+                                </div>
+                            {{/if}}
+                        {{/if}}
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount isolated-value" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
-                            <div class="dropdown" uk-dropdown="mode: click">
-                                <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
-                                    <li><a ondblclick="deleteExpense(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
-                                </ul>
-                            </div>
+                            {{#if is_recurring}}
+                                <button onclick="issueRecuringExpense(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
+                            {{else}}
+                                <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
+                                <div class="dropdown" uk-dropdown="mode: click">
+                                    <ul class="uk-nav uk-dropdown-nav">
+                                        <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
+                                        <li><a ondblclick="deleteExpense(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
+                                    </ul>
+                                </div>
+                            {{/if}}
                         </div>
                     </div>
                 </div>
@@ -102,7 +127,7 @@
         <?php require('widgets/side-bar.php'); ?>
         <?php require('widgets/scripts.php'); ?>
         <script>
-            let tableName = "expense";
+            let expenseTitleList = [];
             let listItemTemplate = Handlebars.compile($("#list-item-template").html());
             let statTemplate = Handlebars.compile($("#stat-template").html());
             $(function() {onload()});
@@ -112,14 +137,31 @@
                     multi: true, 
                 });
                 loadExpense();
+                loadRecurringExpense();
+            }
+
+            async function loadRecurringExpense(){
+                let rows = await new RecurringModel().getRowsByType("expense");
+                rows.forEach((row, index) => {
+                    if(expenseTitleList.includes(row.title)) rows[index]["is_issued"] = true;
+                });
+                $("#recurring-list").html(listItemTemplate({ rows }));
             }
 
             async function loadExpense(){
+                toggleNavProgress(true);
                 let rows = await new ExpenseModel().get();
+                let sortMonth = $("[name=sort-date]").val();
+                expenseTitleList = [];
                 rows = rows.filter(doc => {
-                    let rowMonth = moment(doc.date, "DD MMM YYYY").format("MMM YYYY");
-                    let sortMonth = $("[name=sort-date]").val();
-                    return (rowMonth==sortMonth);
+                    if(sortMonth!="View all"){
+                        let rowMonth = moment(doc.date, "DD MMM YYYY").format("MMM YYYY");
+                        return (rowMonth==sortMonth);
+                    }
+                    else return true;
+                });
+                rows.forEach((doc) => {
+                    expenseTitleList.push(doc.title);
                 });
                 $("#expense-list").html(listItemTemplate({ rows }));
                 $(".half-page").fadeIn();
@@ -165,6 +207,22 @@
                 toggleNavProgress(false, true, id);
                 updateStat();
                 $(e).blur(); 
+            }
+
+            async function issueRecuringExpense(e){
+                toggleNavProgress(true);
+                let newExpense = {
+                    amount: $(e).closest(".checklist-item").find(".checklist-amount").val(),
+                    title: $(e).closest(".checklist-item").find(".checklist-title").val(),
+                    type: "expense",
+                    date: moment().format("DD MMM YYYY"),
+                };
+                let row = await new ExpenseModel().insert(newExpense);
+                $("#expense-list").prepend(listItemTemplate({ rows: [newExpense] }));
+                $("#expense-list .checklist-item:first-child").animateCSS("fadeInDown");
+                $(e).hide();
+                toggleNavProgress(false);
+                updateStat();
             }
 
             async function deleteExpense(e, id){

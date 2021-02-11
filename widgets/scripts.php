@@ -12,3 +12,4 @@
 <?php add_script("js/main.js"); ?>
 <?php add_all_scripts("js/framework"); ?>
 <?php add_all_scripts("js/models"); ?>
+<?php add_script("js/packages/init-datepicker.js"); ?>

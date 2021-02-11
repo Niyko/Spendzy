@@ -24,9 +24,21 @@
             <div class="uk-width-auto uk-flex uk-flex-middle">
                 <p class="nav-bar-title">Incomes</p>
             </div>
-            <div class="uk-width-expand"></div>
+            <div class="uk-width-expand uk-flex uk-flex-center uk-flex-middle">
+                <div class="nav-bar-search-box uk-grid-small" uk-grid>
+                    <div class="uk-width-expand">
+                        <input class="nav-bar-search-input" oninput="searchOnList()" type="text" value="" placeholder="Search" autocomplete="off">
+                    </div>
+                    <div class="uk-width-auto">
+                        <button class="checklist-create-card-btn ripple-effect" onclick="toggleSearchBox(false)" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">close</span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
+                <button class="nav-bar-icon-btn ripple-effect" onclick="toggleSearchBox(true)" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">search</span></button>
+            </div>
             <div class="uk-width-auto uk-flex uk-flex-middle">
-                <input name="sort-date" class="nav-bar-select" onchange="loadIncome()" type="text" data-toggle="monthpicker" value="<?php echo date('M Y'); ?>">
+                <input name="sort-date" class="nav-bar-select" onchange="if(this.value==''){ this.value = 'View all'; } loadIncome();" type="text" data-toggle="monthpicker" value="<?php echo date('M Y'); ?>">
             </div>
             <div class="uk-width-auto uk-flex uk-flex-middle" id="nav-bar-spinner">
                 <div class="spinner-container uk-flex uk-flex-middle uk-flex-center">
@@ -90,7 +102,7 @@
                     <div uk-grid class="uk-grid-small">
                         {{#unless is_recurring}}
                             <div class="uk-width-auto uk-flex uk-flex-middle">
-                                <button onclick="chechGiven(!{{this.is_given}}, this, '{{this.table_id}}')" class="checklist-checkbox {{#if this.is_given}}active{{/if}}"></button>
+                                <button ondblclick="chechGiven(!{{this.is_given}}, this, '{{this.table_id}}')" class="checklist-checkbox {{#if this.is_given}}active{{/if}}"></button>
                             </div>
                         {{/unless}}
                         <div class="uk-width-expand uk-flex uk-flex-middle">
@@ -99,20 +111,25 @@
                         <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
                             <input data-toggle="datepicker" onchange="onOtherDataChange('date', this, '{{this.table_id}}')" class="checklist-date" value="{{this.date}}">
                         </div>
+                        {{#if is_recurring}}
+                            {{#if is_issued}}
+                                <div class="uk-width-auto uk-flex uk-flex-middle">
+                                    <p><span class="material-icons">done_all</span></p>
+                                </div>
+                            {{/if}}
+                        {{/if}}
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount isolated-value" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             {{#if is_recurring}}
-                                {{#unless is_issued}}
-                                    <button onclick="issueRecuringIncome(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
-                                {{/unless}}
+                                <button onclick="issueRecuringIncome(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
                             {{else}}
                                 <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
                                 <div class="dropdown" uk-dropdown="mode: click">
                                     <ul class="uk-nav uk-dropdown-nav">
                                         {{#if is_given}}
-                                            <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
+                                            <li><a ondblclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
                                         {{/if}}
                                         <li><a ondblclick="deleteIncome(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
                                     </ul>
@@ -150,7 +167,7 @@
             }
 
             async function loadRecurringIncome(){
-                let rows = await new RecurringIncomeModel().get();
+                let rows = await new RecurringModel().getRowsByType("income");
                 rows.forEach((row, index) => {
                     if(incomeTitleList.includes(row.title)) rows[index]["is_issued"] = true;
                 });
@@ -158,12 +175,16 @@
             }
 
             async function loadIncome(){
+                toggleNavProgress(true);
                 let rows = await new IncomeModel().get();
+                let sortMonth = $("[name=sort-date]").val();
                 incomeTitleList = [];
                 let isGivenRows = rows.filter(doc => {
-                    let rowMonth = moment(doc.date, "DD MMM YYYY").format("MMM YYYY");
-                    let sortMonth = $("[name=sort-date]").val();
-                    return (rowMonth==sortMonth);
+                    if(sortMonth!="View all"){
+                        let rowMonth = moment(doc.date, "DD MMM YYYY").format("MMM YYYY");
+                        return (rowMonth==sortMonth);
+                    }
+                    else return true;
                 });
                 isGivenRows = isGivenRows.filter(doc => {
                     if(doc.is_given) incomeTitleList.push(doc.title);
@@ -206,7 +227,7 @@
                 $(e).toggleClass("active");
                 $(e).closest(".checklist-item").prependTo((isGiven?"#given-list":"#not-given-list"));
                 $(e).closest(".checklist-item").animateCSS("fadeInDown");
-                $(e).attr("onclick", `chechGiven(!${isGiven}, this, '${id}')`);
+                $(e).attr("ondblclick", `chechGiven(!${isGiven}, this, '${id}')`);
                 if(isImagineMode) updateStat();
             }
 

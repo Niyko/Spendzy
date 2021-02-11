@@ -7,20 +7,7 @@ function onChildTreeChange(){
     let treeConfig = { subtree: true, childList: true};
     let treeObserver = new MutationObserver(function() {
         treeObserver.disconnect();
-        $("[data-toggle='datepicker']").pickadate({
-            format: 'dd mmm yyyy',
-            formatSubmit: 'dd mmm yyyy',
-            onClose: function() {
-                document.activeElement.blur();
-            }
-        });
-        $("[data-toggle='monthpicker']").pickadate({
-            format: 'mmm yyyy',
-            formatSubmit: 'mmm yyyy',
-            onClose: function() {
-                document.activeElement.blur();
-            }
-        });
+        initDatepicker();
         if(getCookie("isolated-value")=="true") isolateValues(true);
         if(typeof onPageChildTreeChange!=="undefined") onPageChildTreeChange();
         treeObserver.observe(treeTarget, treeConfig);
@@ -76,4 +63,25 @@ function isolateValues(status){
         setCookie("isolated-value", "false");
         $(".isolated-value-btn").find("span").html("shield");
     }
+}
+
+function toggleSearchBox(status){
+    if(status){
+        $(".nav-bar-search-box").addClass("active");
+        $(".nav-bar-search-input").focus();
+    }
+    else {
+        $(".nav-bar-search-box").removeClass("active");
+        $(".nav-bar-search-input").val("");
+        searchOnList();
+    }
+}
+
+function searchOnList(){
+    let searchTerm = $(".nav-bar-search-input").val();
+    $(".checklist-item").each(function() {
+        let searchData = $(this).find(".checklist-title").val();
+        if(searchData.indexOf(searchTerm)<0) $(this).addClass("checklist-item-search-hide");
+        else $(this).removeClass("checklist-item-search-hide");
+    });
 }
