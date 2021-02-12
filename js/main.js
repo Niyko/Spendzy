@@ -78,10 +78,10 @@ function toggleSearchBox(status){
 }
 
 function searchOnList(){
-    let searchTerm = $(".nav-bar-search-input").val();
+    let searchTerm = $(".nav-bar-search-input").val().toLowerCase();
     $(".checklist-item").each(function() {
         let searchData = $(this).find(".checklist-title").val();
-        if(searchData.indexOf(searchTerm)<0) $(this).addClass("checklist-item-search-hide");
+        if(searchData.toLowerCase().indexOf(searchTerm)<0) $(this).addClass("checklist-item-search-hide");
         else $(this).removeClass("checklist-item-search-hide");
     });
 }

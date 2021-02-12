@@ -416,9 +416,25 @@ button, button:active, input:focus, input:invalid{
     font-size: 50px;
     margin: 0;
     padding: 0px;
-    line-height: 0px;
+    line-height: 50px;
     color: #5f6368;
 }
+
+.lockscreen img{
+    position: relative;
+    top: 6px;
+    left: 5px;
+    height: 37px;
+    animation-name: lockscreen-rotate;
+    animation-duration: 4s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+@keyframes lockscreen-rotate {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+  }
 
 /*---- Isolated Value ----*/
 .isolated-hidden-value{

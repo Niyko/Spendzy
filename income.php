@@ -81,7 +81,7 @@
                     <div id="given-list"><!--- List render from JS ---></div>
                     <div class="divider"></div>
                     <div class="uk-flex uk-flex-right">
-                        <span class="imagine-checkbox" onclick="toggleImagineMode()"><span class="material-icons">toys</span></span>
+                        <span class="imagine-checkbox" onclick="toggleImagineMode()"><span class="material-icons">filter_vintage</span></span>
                     </div>
                 </div>
             </div>
@@ -123,7 +123,7 @@
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             {{#if is_recurring}}
-                                <button onclick="issueRecuringIncome(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
+                                <button ondblclick="issueRecuringIncome(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
                             {{else}}
                                 <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
                                 <div class="dropdown" uk-dropdown="mode: click">

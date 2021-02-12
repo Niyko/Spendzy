@@ -104,7 +104,7 @@
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             {{#if is_recurring}}
-                                <button onclick="issueRecuringExpense(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
+                                <button ondblclick="issueRecuringExpense(this)" class="checklist-btn ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3">Issue</button>
                             {{else}}
                                 <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
                                 <div class="dropdown" uk-dropdown="mode: click">

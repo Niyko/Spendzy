@@ -41,7 +41,6 @@
         </div>
 
         <!----- Templates ----->
-
         <template hidden id="small-graph-card-template">
             <div>
                 <div class="analytics-value-card">
