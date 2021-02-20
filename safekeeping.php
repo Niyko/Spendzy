@@ -85,8 +85,8 @@
                         <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
                             <div class="dropdown" uk-dropdown="mode: click">
                                 <ul class="uk-nav uk-dropdown-nav">
-                                    <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
-                                    <li><a onclick="deleteSafekeeping(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
+                                    <li><a ondblclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
+                                    <li><a ondblclick="deleteSafekeeping(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -174,6 +174,7 @@
                 };
                 toggleNavProgress(true, true, id);
                 let row = await new LogbackModel().insert(newLog);
+                let deletedRow = await new SafekeepingModel().delete(id);
                 toggleNavProgress(false, true, id);
                 updateStat();
                 $(e).closest(".checklist-item").addClass("checklist-item-deleted");

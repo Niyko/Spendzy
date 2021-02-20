@@ -265,6 +265,7 @@
                 };
                 toggleNavProgress(true);
                 let row = await new LogbackModel().insert(newLog);
+                let deletedRow = await new IncomeModel().delete(id);
                 toggleNavProgress(false);
                 updateStat();
                 $(e).closest(".checklist-item").addClass("checklist-item-deleted");

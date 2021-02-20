@@ -109,7 +109,7 @@
                                 <button class="checklist-delete ripple-effect" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">more_vert</span></button>
                                 <div class="dropdown" uk-dropdown="mode: click">
                                     <ul class="uk-nav uk-dropdown-nav">
-                                        <li><a onclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
+                                        <li><a ondblclick="addToLog(this, '{{this.table_id}}')"><span class="material-icons">addchart</span> Add to log</a></li>
                                         <li><a ondblclick="deleteExpense(this, '{{this.table_id}}')"><span class="material-icons">delete</span> Delete</a></li>
                                     </ul>
                                 </div>
