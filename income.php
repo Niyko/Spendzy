@@ -106,10 +106,10 @@
                             </div>
                         {{/unless}}
                         <div class="uk-width-expand uk-flex uk-flex-middle">
-                            <input type="text" onchange="onOtherDataChange('title', this, '{{this.table_id}}')" class="checklist-title" value="{{this.title}}">
+                            <input type="text" onchange="onOtherDataChange('title', this, '{{this.table_id}}')" class="checklist-title  {{#if is_recurring}} no-pointer-events {{/if}}" value="{{this.title}}">
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle uk-visible@m">
-                            <input data-toggle="datepicker" onchange="onOtherDataChange('date', this, '{{this.table_id}}')" class="checklist-date" value="{{this.date}}">
+                            <input data-toggle="datepicker" onchange="onOtherDataChange('date', this, '{{this.table_id}}')" class="checklist-date  {{#if is_recurring}} no-pointer-events {{/if}}" value="{{this.date}}">
                         </div>
                         {{#if is_recurring}}
                             {{#if is_issued}}
@@ -119,7 +119,7 @@
                             {{/if}}
                         {{/if}}
                         <div class="uk-width-auto uk-flex uk-flex-middle">
-                            <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount isolated-value" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
+                            <input type="text" onchange="onOtherDataChange('amount', this, '{{this.table_id}}')" class="checklist-amount isolated-value  {{#if is_recurring}} no-pointer-events {{/if}}" value="{{this.amount}}"><span class="checklist-amount-currency">/-</span>
                         </div>
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             {{#if is_recurring}}

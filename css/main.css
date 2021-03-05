@@ -32,6 +32,10 @@ button, button:active, input:focus, input:invalid{
     display: none;
 }
 
+.no-pointer-events{
+    pointer-events: none;
+}
+
 /*---- Nav Bar ----*/
 .nav-bar{
     box-shadow: inset 0 -1px 0 0 #dadce0;
