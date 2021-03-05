@@ -161,6 +161,19 @@ button, button:active, input:focus, input:invalid{
     outline: none;
 }
 
+/*---- Button ----*/
+.btn-label{
+    background: #b2b2b2;
+    color: #fff;
+    padding: 1px 3px;
+    border-radius: 4px;
+    font-family: 'ps-bold';
+}
+
+.btn-label.active{
+    background: #ffbf00;
+}
+
 /*---- Page ----*/
 .half-page{
     max-width: 680px;

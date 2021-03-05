@@ -106,7 +106,8 @@
                     totalSafekepping += parseInt(safekeepingData[i]["amount"]);
                 }
                 let totalFund = await new FundModel().getTotal();
-                $("#graphs-container").append(getGraph("Bank balance", numberWithCommas((totalGiven-totalExpense)+totalSafekepping), true, goalValue, (totalGiven-totalExpense)));
+                $("#graphs-container").append(getGraph("HDFC Bank balance", numberWithCommas((totalGiven-totalExpense)), true, goalValue, (totalGiven-totalExpense)));
+                $("#graphs-container").append(getGraph("SBI Bank balance", numberWithCommas(totalSafekepping+totalFund[1]), false));
                 $("#graphs-container").append(getGraph("Mine", numberWithCommas(totalGiven-totalExpense), true, goalValue, (totalGiven-totalExpense)));
                 $("#graphs-container").append(getGraph("Goal reached", (((totalGiven-totalExpense)/goalValue)*100).toFixed(0)+"%", true, goalValue, (totalGiven-totalExpense)));
                 $("#graphs-container").append(getGraph("Total income", numberWithCommas(totalIncome), true, (totalIncome+totalExpense), totalIncome));
@@ -114,7 +115,7 @@
                 $("#graphs-container").append(getGraph("Total given", numberWithCommas(totalGiven), true, totalIncome, totalGiven));
                 $("#graphs-container").append(getGraph("To be given", numberWithCommas(totalNotGiven), true, totalIncome, totalNotGiven));
                 $("#graphs-container").append(getGraph("Safekeeping", numberWithCommas(totalSafekepping), false));
-                $("#graphs-container").append(getGraph("Hedge fund", numberWithCommas(totalFund), false));
+                $("#graphs-container").append(getGraph("Hedge fund", nFormatter(totalFund[0], 2), false));
                 initGraphs();
                 toggleNavProgress(false);
                 $(".half-page").fadeIn();

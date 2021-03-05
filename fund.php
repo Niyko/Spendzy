@@ -64,7 +64,7 @@
                         <div class="checklist-item">
                             <div uk-grid class="uk-grid-small">
                                 <div class="uk-width-auto uk-flex uk-flex-middle">
-                                    <button class="checklist-delete ripple-effect"><span class="material-icons">flag</span></button>
+                                    <button class="checklist-delete"><span class="material-icons">flag</span></button>
                                 </div>
                                 <div class="uk-width-expand uk-flex uk-flex-middle">
                                     <input id="goal-name" type="text" onchange="onGoalDataChange(this, 'goal-name')" class="checklist-title" value="" placeholder="Goal Name">
@@ -88,6 +88,9 @@
                     <div uk-grid class="uk-grid-small">
                         <div class="uk-width-auto uk-flex uk-flex-middle">
                             <button class="checklist-delete ripple-effect" onclick="toggleInfo(this)" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="material-icons">expand_more</span></button>
+                        </div>
+                        <div class="uk-width-auto uk-flex uk-flex-middle">
+                            <button class="checklist-delete ripple-effect" ondblclick="toggleFixedFund(this, '{{this.table_id}}', {{this.is_fd}})" data-duration="0.5" data-color="auto" data-opacity="0.3"><span class="btn-label {{#if is_fd}} active {{/if}}">FD</span></button>
                         </div>
                         <div class="uk-width-expand uk-flex uk-flex-middle">
                             <input type="text" onchange="onOtherDataChange('title', this, '{{this.table_id}}')" class="checklist-title" value="{{this.title}}">
@@ -152,6 +155,7 @@
                 let newFund = {
                     amount: $("input[name=fund-amount]").val(),
                     title: $("input[name=fund-title]").val(),
+                    is_fd: false,
                     description: "",
                     date: $("input[name=fund-date]").val(),
                 };
@@ -188,10 +192,17 @@
                 $(e).closest(".checklist-item").addClass("checklist-item-deleted");
             }
 
+            async function toggleFixedFund(e, id, is_fd){
+                toggleNavProgress(true, true, id);
+                let status = await new FundModel().update(id, "is_fd", !is_fd);
+                $(e).find("span").toggleClass("active");
+                toggleNavProgress(false, true, id);
+            }
+
             async function updateStat(){
                 let totalFund = await new FundModel().getTotal();
                 $("#current-stat").html(statTemplate({
-                    total_fund: nFormatter(totalFund, 1),
+                    total_fund: nFormatter(totalFund[0]+totalFund[1], 1),
                 }));
             }
 

@@ -11,10 +11,12 @@ class FundModel extends Model {
 
     async getTotal(){
         let rows = await this.get();
-        let totalFund = 0;
+        let totalNonFD = 0;
+        let totalFD = 0;
         rows.forEach(function (row) {
-            totalFund += parseInt(row.amount);
+            if(row.is_fd) totalFD += parseInt(row.amount);
+            else totalNonFD += parseInt(row.amount);
         });
-        return totalFund;
+        return [totalFD, totalNonFD];
     }
 }
