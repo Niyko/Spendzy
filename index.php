@@ -179,8 +179,8 @@
                 plotDates.forEach(element => {
                     plot[element] = plotData[element];
                 });
-                let secondLastValue = Object.values(plot).at(-2);
-                let lastValue = Object.values(plot).at(-1);
+                let secondLastValue = Object.values(plot).slice(-2)[0];
+                let lastValue = Object.values(plot).slice(-1)[0];
                 let deviationAmount = lastValue-secondLastValue;
                 let deviationPercentage = ((deviationAmount/secondLastValue)*100).toFixed(0);
                 return {
