@@ -45,7 +45,7 @@
                             <div id="growth-area-graph"></div>
                         </div>
                     </div>
-                    <div id="bank-graphs-container" uk-grid class="uk-grid-small uk-child-width-1-1"></div>
+                    <div id="bank-graphs-container" uk-grid class="uk-grid-small uk-child-width-1-1 uk-padding-remove-left uk-margin-remove-left"></div>
                 </div>
             </div>
         </div>
