@@ -20,3 +20,14 @@
 .analytics-value-card-donut{
     width: 50px;
 }
+
+.analytics-area-graph-icon{
+    opacity: 0.7;
+}
+
+.analytics-area-graph-amount{
+    font-size: 18px;
+    position: relative;
+    top: -6px;
+    opacity: 0.7;
+}

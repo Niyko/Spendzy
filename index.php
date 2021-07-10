@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <title>Spendzy</title>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
         <?php require('widgets/header.php'); ?>
         <?php add_css("css/analytics.css"); ?>
     </head>
@@ -36,7 +37,16 @@
         </div>
         <div class="uk-flex uk-flex-center">
             <div class="half-page uk-width-1-1 uk-margin-top hide">
-                <div id="graphs-container" uk-grid class="uk-grid-small uk-child-width-1-1 uk-child-width-1-2@m"></div>
+                <div id="graphs-container" uk-grid class="uk-grid-small uk-child-width-1-1 uk-child-width-1-2@m">
+                    <div>
+                        <div class="analytics-value-card growth-area-graph">
+                            <p class="analytics-value-card-title">Growth</p>
+                            <p class="analytics-value-card-value isolated-value"></p>
+                            <div id="growth-area-graph"></div>
+                        </div>
+                    </div>
+                    <div id="bank-graphs-container" uk-grid class="uk-grid-small uk-child-width-1-1"></div>
+                </div>
             </div>
         </div>
 
@@ -66,12 +76,19 @@
                 </div>
             </div>
         </template>
+
+        <template hidden id="area-graph-title-template">
+            {{deviation_percentage}}%
+            <span class="material-icons analytics-area-graph-icon">{{deviation_icon}}</span>
+            <span class="analytics-area-graph-amount">{{deviation_amount}}</span>
+        </template>
         
         <?php require('widgets/side-bar.php'); ?>
         <?php require('widgets/scripts.php'); ?>
         <?php add_script("js/packages/donutty.js"); ?>
         <script>
             let smallGraphCardTemplate = Handlebars.compile($("#small-graph-card-template").html());
+            let areaGraphTitleTemplate = Handlebars.compile($("#area-graph-title-template").html());
             let incomeData, expenseData, safekeepingData, configData;
             $(function() {onload()});
 
@@ -87,11 +104,22 @@
                 expenseData = await new ExpenseModel().get();
                 safekeepingData = await new SafekeepingModel().get();
                 configData = await new ConfigModel().getConfigs();
+                loadAreaGraph();
                 loadGraph();
             }
 
+            async function loadAreaGraph(){
+                let growthChartData = getAreaGraphOptions("Growth", incomeData);
+                let growthChart = new ApexCharts(document.querySelector("#growth-area-graph"), growthChartData.options);
+                growthChart.render();
+                $(".growth-area-graph .analytics-value-card-value").html(areaGraphTitleTemplate({
+                    deviation_percentage: growthChartData.deviation.percentage,
+                    deviation_icon: (growthChartData.deviation.percentage>-1)?'moving':'trending_down',
+                    deviation_amount: nFormatter(growthChartData.deviation.amount, 2)
+                }));
+            }
+
             async function loadGraph(){
-                $("#graphs-container").html("");
                 let totalGiven = 0, totalNotGiven = 0, totalIncome = 0, totalExpense = 0, totalSafekepping = 0;
                 let goalValue = parseInt(configData["goal-amount"]);
                 for (var i = 0; i < incomeData.length; i++) {
@@ -106,13 +134,11 @@
                     totalSafekepping += parseInt(safekeepingData[i]["amount"]);
                 }
                 let totalFund = await new FundModel().getTotal();
-                $("#graphs-container").append(getGraph("HDFC Bank balance", numberWithCommas((totalGiven-totalExpense)), true, goalValue, (totalGiven-totalExpense)));
-                $("#graphs-container").append(getGraph("SBI Bank balance", numberWithCommas(totalSafekepping+totalFund[1]), false));
-                $("#graphs-container").append(getGraph("Mine", numberWithCommas(totalGiven-totalExpense), true, goalValue, (totalGiven-totalExpense)));
+                $("#bank-graphs-container").append(getGraph("HDFC Bank balance", numberWithCommas((totalGiven-totalExpense)), true, goalValue, (totalGiven-totalExpense)));
+                $("#bank-graphs-container").append(getGraph("SBI Bank balance", numberWithCommas(totalSafekepping+totalFund[1]), false));
                 $("#graphs-container").append(getGraph("Goal reached", (((totalGiven-totalExpense)/goalValue)*100).toFixed(0)+"%", true, goalValue, (totalGiven-totalExpense)));
                 $("#graphs-container").append(getGraph("Total income", numberWithCommas(totalIncome), true, (totalIncome+totalExpense), totalIncome));
                 $("#graphs-container").append(getGraph("Total expense", numberWithCommas(totalExpense), true, (totalIncome+totalExpense), totalExpense));
-                $("#graphs-container").append(getGraph("Total given", numberWithCommas(totalGiven), true, totalIncome, totalGiven));
                 $("#graphs-container").append(getGraph("To be given", numberWithCommas(totalNotGiven), true, totalIncome, totalNotGiven));
                 $("#graphs-container").append(getGraph("Safekeeping", numberWithCommas(totalSafekepping), false));
                 $("#graphs-container").append(getGraph("Hedge fund", nFormatter(totalFund[0], 2), false));
@@ -136,6 +162,67 @@
                     graph_max: graph_max,
                     graph_value: graph_value
                 });
+            }
+
+            function convertDataToPlot(title, data){
+                let plot = [];
+                let plotData = [];
+                data.forEach(element => {
+                    let month = moment(element.date, "DD MMM YYYY").format("MMM YYYY");
+                    if(!plotData[month]) plotData[month] = 0;
+                    plotData[month] = Number(plotData[month]) + Number(element.amount)
+                });
+                let plotDates = Object.keys(plotData);
+                plotDates.sort(function(a,b){
+                    return new Date(`01 ${a}`) - new Date(`01 ${b}`);
+                });
+                plotDates.forEach(element => {
+                    plot[element] = plotData[element];
+                });
+                let secondLastValue = Object.values(plot).at(-2);
+                let lastValue = Object.values(plot).at(-1);
+                let deviationAmount = lastValue-secondLastValue;
+                let deviationPercentage = ((deviationAmount/secondLastValue)*100).toFixed(0);
+                return {
+                    name: title,
+                    data: Object.values(plot),
+                    labels: Object.keys(plot),
+                    deviation: {
+                        percentage: deviationPercentage,
+                        amount: Math.abs(deviationAmount)
+                    }
+                };
+            }
+
+            function getAreaGraphOptions(title, data){
+                let options = convertDataToPlot(title, data);
+                return {
+                    deviation: options.deviation,
+                    options: {
+                        series: [{
+                            name: options.name,
+                            data: options.data
+                        }],
+                        chart: {
+                            type: 'area',
+                            height: 118,
+                            zoom: { enabled: false },
+                            toolbar: { show: false },
+                            sparkline: { enabled: true }
+                        },
+                        dataLabels: { enabled: false },
+                        stroke: { curve: 'smooth' },
+                        colors:['#FEC007'],
+                        labels: options.labels,
+                        xaxis: {
+                            labels: { show: false }
+                        },
+                        yaxis: {
+                            labels: { show: false },
+                        },
+                        grid: { show: false }
+                    }
+                };
             }
         </script>
     </body>
